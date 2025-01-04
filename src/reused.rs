@@ -125,6 +125,40 @@ where
     builder(client::rustls_default(), Scheme::HTTPS, authority)
 }
 
+/// Builder of [`ReusedService`], with [`client::nativetls_default()`].
+///
+/// For the meaning of "authority", refer to the documentation of [`Uri`](http::uri::Uri).
+#[cfg(feature = "nativetls")]
+#[cfg_attr(docsrs, doc(cfg(feature = "nativetls")))]
+pub fn builder_nativetls<B, A>(
+    authority: A,
+) -> Result<Builder<NativeTlsConnector<HttpConnector>, B>, HttpError>
+where
+    B: HttpBody + Send,
+    B::Data: Send,
+    Authority: TryFrom<A>,
+    <Authority as TryFrom<A>>::Error: Into<HttpError>,
+{
+    builder(client::nativetls_default(), Scheme::HTTPS, authority)
+}
+
+/// Builder of [`ReusedService`], with [`client::rustls_default()`].
+///
+/// For the meaning of "authority", refer to the documentation of [`Uri`](http::uri::Uri).
+#[cfg(feature = "__rustls")]
+#[cfg_attr(docsrs, doc(cfg(feature = "rustls")))]
+pub fn builder_rustls<B, A>(
+    authority: A,
+) -> Result<Builder<RustlsConnector<HttpConnector>, B>, HttpError>
+where
+    B: HttpBody + Send,
+    B::Data: Send,
+    Authority: TryFrom<A>,
+    <Authority as TryFrom<A>>::Error: Into<HttpError>,
+{
+    builder(client::rustls_default(), Scheme::HTTPS, authority)
+}
+
 /// Builder of [`ReusedService`].
 ///
 /// For the meaning of "scheme" and "authority", refer to the documentation of
