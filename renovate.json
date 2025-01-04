@@ -3,5 +3,6 @@
     "extends": [
         "github>kristof-mattei/renovate-config",
         "local>kristof-mattei/tower-reverse-proxy//renovate-dont-update-cargo"
-    ]
+    ],
+    "forkProcessing": "enabled"
 }
