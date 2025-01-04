@@ -2,22 +2,18 @@
 //! [`hyper_tls`].
 //!
 use hyper::body::Body as HttpBody;
-pub use hyper_util::client::legacy::{Builder, Client};
-
-use hyper_util::client::legacy::connect::Connect;
-pub use hyper_util::client::legacy::connect::HttpConnector;
-
-#[cfg(feature = "https")]
-#[cfg_attr(docsrs, doc(cfg(feature = "https")))]
-pub use hyper_tls::HttpsConnector;
-
 #[cfg(feature = "__rustls")]
 #[cfg_attr(docsrs, doc(cfg(feature = "rustls")))]
 pub use hyper_rustls::HttpsConnector as RustlsConnector;
-
+#[cfg(feature = "https")]
+#[cfg_attr(docsrs, doc(cfg(feature = "https")))]
+pub use hyper_tls::HttpsConnector;
 #[cfg(feature = "nativetls")]
 #[cfg_attr(docsrs, doc(cfg(feature = "nativetls")))]
 pub use hyper_tls::HttpsConnector as NativeTlsConnector;
+use hyper_util::client::legacy::connect::Connect;
+pub use hyper_util::client::legacy::connect::HttpConnector;
+pub use hyper_util::client::legacy::{Builder, Client};
 
 /// Default [`Builder`].
 #[must_use]

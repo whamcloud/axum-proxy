@@ -1,27 +1,22 @@
-use crate::client;
-use crate::future::RevProxyFuture;
-use crate::rewrite::PathRewriter;
-use crate::Error;
+use std::convert::Infallible;
+use std::sync::Arc;
+use std::task::{Context, Poll};
 
 use client::HttpConnector;
 #[cfg(feature = "__rustls")]
 use client::RustlsConnector;
+use http::uri::{Authority, Scheme};
+use http::{Error as HttpError, Request, Response};
+use hyper::body::{Body as HttpBody, Incoming};
 #[cfg(feature = "nativetls")]
 use hyper_tls::HttpsConnector as NativeTlsConnector;
-
-use http::uri::{Authority, Scheme};
-use http::Error as HttpError;
-use http::{Request, Response};
-
-use hyper::body::Body as HttpBody;
-use hyper::body::Incoming;
-use hyper_util::client::legacy::{connect::Connect, Client};
-
+use hyper_util::client::legacy::connect::Connect;
+use hyper_util::client::legacy::Client;
 use tower_service::Service;
 
-use std::convert::Infallible;
-use std::sync::Arc;
-use std::task::{Context, Poll};
+use crate::future::RevProxyFuture;
+use crate::rewrite::PathRewriter;
+use crate::{client, Error};
 
 type BoxErr = Box<dyn std::error::Error + Send + Sync>;
 
@@ -394,12 +389,11 @@ where
 
 #[cfg(test)]
 mod test {
-    use super::*;
-    use crate::test_helper;
-    use crate::ReplaceAll;
-
     use http::uri::{Parts, Uri};
     use mockito::ServerGuard;
+
+    use super::*;
+    use crate::{test_helper, ReplaceAll};
 
     async fn make_svc() -> (
         ServerGuard,

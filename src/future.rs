@@ -1,17 +1,16 @@
-use crate::rewrite::PathRewriter;
-use crate::Error;
-
-use http::uri::{Authority, Scheme};
-use http::Error as HttpError;
-use http::{Request, Response};
-
-use hyper::body::{Body as HttpBody, Incoming};
-use hyper_util::client::legacy::{connect::Connect, Client, ResponseFuture};
-
 use std::convert::Infallible;
 use std::future::Future;
 use std::pin::Pin;
 use std::task::{Context, Poll};
+
+use http::uri::{Authority, Scheme};
+use http::{Error as HttpError, Request, Response};
+use hyper::body::{Body as HttpBody, Incoming};
+use hyper_util::client::legacy::connect::Connect;
+use hyper_util::client::legacy::{Client, ResponseFuture};
+
+use crate::rewrite::PathRewriter;
+use crate::Error;
 
 type BoxErr = Box<dyn std::error::Error + Send + Sync>;
 

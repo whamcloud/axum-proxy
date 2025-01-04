@@ -179,19 +179,15 @@ pub use reused::{builder, builder_http};
 
 #[cfg(test)]
 mod test_helper {
-    use super::{Error, RevProxyFuture};
     use std::convert::Infallible;
 
-    use http::StatusCode;
-    use http::{Request, Response};
-
-    use hyper::body::Incoming;
-
+    use http::{Request, Response, StatusCode};
     use http_body_util::BodyExt;
-
+    use hyper::body::Incoming;
+    use mockito::{Matcher, ServerGuard};
     use tower_service::Service;
 
-    use mockito::{Matcher, ServerGuard};
+    use super::{Error, RevProxyFuture};
 
     async fn call<S, B>(
         service: &mut S,

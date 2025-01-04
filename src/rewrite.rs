@@ -5,9 +5,7 @@
 use std::borrow::Cow;
 
 use http::uri::{Authority, Scheme, Uri};
-use http::Error as HttpError;
-use http::Request;
-
+use http::{Error as HttpError, Request};
 use regex::{Regex as LibRegex, Replacer};
 
 /// Represents a rule to rewrite a path `/foo/bar/baz` to new one.
