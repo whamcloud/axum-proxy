@@ -4,4 +4,4 @@ These `Service`s are implemented to be used in [axum](https://crates.io/crates/a
 
 See the [documentation](https://docs.rs/tower-reverse-proxy).
 
-This crate was forked from https://github.com/manorom/reverse-proxy-service, & the name was changed so a new crate could be published.
+This crate was forked from https://github.com/manorom/reverse-proxy-service, & the name was changed so a new crate could be published
