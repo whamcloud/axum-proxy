@@ -1,13 +1,12 @@
-use http::Error as HttpError;
-use hyper_util::client::legacy::Error as HyperError;
+use std::error::Error as StdError;
+use std::fmt;
 
 #[cfg(feature = "axum")]
 use axum::response::{IntoResponse, Response};
+use http::Error as HttpError;
 #[cfg(feature = "axum")]
 use http::StatusCode;
-
-use std::error::Error as StdError;
-use std::fmt;
+use hyper_util::client::legacy::Error as HyperError;
 
 #[derive(Debug)]
 pub enum Error {
@@ -20,10 +19,10 @@ impl fmt::Display for Error {
         match self {
             Self::InvalidUri(e) => {
                 write!(f, "Invalid uri: {e}")
-            }
+            },
             Self::RequestFailed(e) => {
                 write!(f, "Request failed: {e}")
-            }
+            },
         }
     }
 }

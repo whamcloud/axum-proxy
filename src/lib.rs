@@ -179,23 +179,19 @@ pub use reused::{builder, builder_http};
 
 #[cfg(test)]
 mod test_helper {
-    use super::{Error, RevProxyFuture};
     use std::convert::Infallible;
 
-    use http::StatusCode;
-    use http::{Request, Response};
-
-    use hyper::body::Incoming;
-
+    use http::{Request, Response, StatusCode};
     use http_body_util::BodyExt;
-
+    use hyper::body::Incoming;
+    use mockito::{Matcher, ServerGuard};
     use tower_service::Service;
 
-    use mockito::{Matcher, ServerGuard};
+    use super::{Error, RevProxyFuture};
 
     async fn call<S, B>(
-        svc: &mut S,
-        req: (&str, &str, Option<&str>, B),
+        service: &mut S,
+        (method, suffix, content_type, body): (&str, &str, Option<&str>, B),
         expected: (StatusCode, &str),
     ) where
         S: Service<
@@ -206,27 +202,26 @@ mod test_helper {
         >,
         B: Into<String>,
     {
-        let req = if let Some(content_type) = req.2 {
-            Request::builder()
-                .method(req.0)
-                .uri(format!("https://test.com{}", req.1))
-                .header("Content-Type", content_type)
-                .body(req.3.into())
-        } else {
-            Request::builder()
-                .method(req.0)
-                .uri(format!("https://test.com{}", req.1))
-                .uri(format!("https://test.com{}", req.1))
-                .body(req.3.into())
-        }
-        .unwrap();
-        let res = svc.call(req).await.unwrap();
-        assert!(res.is_ok());
-        let res = res.unwrap();
-        assert_eq!(res.status(), expected.0);
-        let res = res.into_body().collect().await;
-        assert!(res.is_ok());
-        assert_eq!(res.unwrap().to_bytes(), expected.1);
+        let mut builder = Request::builder()
+            .method(method)
+            .uri(format!("https://test.com{}", suffix));
+
+        if let Some(content_type) = content_type {
+            builder = builder.header("Content-Type", content_type);
+        };
+
+        let request = builder.body(body.into()).unwrap();
+
+        let result = service.call(request).await.unwrap();
+        assert!(result.is_ok());
+
+        let response = result.unwrap();
+        assert_eq!(response.status(), expected.0);
+
+        let body = response.into_body().collect().await;
+        assert!(body.is_ok());
+
+        assert_eq!(body.unwrap().to_bytes(), expected.1);
     }
 
     pub async fn match_path<S>(server: &mut ServerGuard, svc: &mut S)

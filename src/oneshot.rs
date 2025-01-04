@@ -1,26 +1,22 @@
-use crate::client;
-use crate::future::RevProxyFuture;
-use crate::rewrite::PathRewriter;
-use crate::Error;
+use std::convert::Infallible;
+use std::task::{Context, Poll};
 
 use client::HttpConnector;
 #[cfg(feature = "__rustls")]
 use client::RustlsConnector;
-#[cfg(feature = "nativetls")]
-use hyper_tls::HttpsConnector as NativeTlsConnector;
-
 use http::uri::{Authority, Scheme};
-use http::Error as HttpError;
-use http::{Request, Response};
-
+use http::{Error as HttpError, Request, Response};
 //use hyper::body::{Body, HttpBody};
 use hyper::body::{Body as HttpBody, Incoming};
-use hyper_util::client::legacy::{connect::Connect, Client};
-
+#[cfg(feature = "nativetls")]
+use hyper_tls::HttpsConnector as NativeTlsConnector;
+use hyper_util::client::legacy::connect::Connect;
+use hyper_util::client::legacy::Client;
 use tower_service::Service;
 
-use std::convert::Infallible;
-use std::task::{Context, Poll};
+use crate::future::RevProxyFuture;
+use crate::rewrite::PathRewriter;
+use crate::{client, Error};
 
 type BoxErr = Box<dyn std::error::Error + Send + Sync>;
 
@@ -43,6 +39,7 @@ type BoxErr = Box<dyn std::error::Error + Send + Sync>;
 /// let _res = svc.call(req).await.unwrap();
 /// # }
 /// ```
+#[expect(clippy::module_name_repetitions)]
 pub struct OneshotService<Pr, C = HttpConnector, B = Incoming> {
     client: Client<C, B>,
     scheme: Scheme,
@@ -63,7 +60,7 @@ impl<Pr: Clone, C: Clone, B> Clone for OneshotService<Pr, C, B> {
 }
 
 impl<Pr, C, B> OneshotService<Pr, C, B> {
-    /// Initializes a service with a general `Client`.
+    /// Initializes a service with a general [`Client`].
     ///
     /// A client can be built by functions in [`client`].
     ///
@@ -71,6 +68,10 @@ impl<Pr, C, B> OneshotService<Pr, C, B> {
     /// [`Uri`](http::uri::Uri).
     ///
     /// The `path` should implement [`PathRewriter`].
+    ///
+    /// # Errors
+    ///
+    /// When `scheme` or `authority` cannot be converted into a [`Scheme`] or [`Authority`].
     pub fn from<S, A>(
         client: Client<C, B>,
         scheme: S,
@@ -104,6 +105,10 @@ where
     /// For the meaning of "authority", refer to the documentation of [`Uri`](http::uri::Uri).
     ///
     /// The `path` should implement [`PathRewriter`].
+    ///
+    /// # Errors
+    ///
+    /// When `authority` cannot be converted into an [`Authority`].
     pub fn http_default<A>(authority: A, path: Pr) -> Result<Self, HttpError>
     where
         Authority: TryFrom<A>,
@@ -132,6 +137,10 @@ where
     /// For the meaning of "authority", refer to the documentation of [`Uri`](http::uri::Uri).
     ///
     /// The `path` should implement [`PathRewriter`].
+    ///
+    /// # Errors
+    ///
+    /// When `authority` cannot be converted into an [`Authority`].
     #[cfg_attr(docsrs, doc(cfg(any(feature = "https", feature = "nativetls"))))]
     pub fn https_default<A>(authority: A, path: Pr) -> Result<Self, HttpError>
     where
@@ -160,6 +169,9 @@ where
     ///
     /// The `path` should implement [`PathRewriter`].
     #[cfg_attr(docsrs, doc(cfg(feature = "nativetls")))]
+    /// # Errors
+    ///
+    /// When `authority` cannot be converted into an [`Authority`].
     pub fn nativetls_default<A>(authority: A, path: Pr) -> Result<Self, HttpError>
     where
         Authority: TryFrom<A>,
@@ -187,6 +199,9 @@ where
     ///
     /// The `path` should implement [`PathRewriter`].
     #[cfg_attr(docsrs, doc(cfg(feature = "rustls")))]
+    /// # Errors
+    ///
+    /// When `authority` cannot be converted into an [`Authority`].
     pub fn https_default<A>(authority: A, path: Pr) -> Result<Self, HttpError>
     where
         Authority: TryFrom<A>,
@@ -231,12 +246,11 @@ where
 
 #[cfg(test)]
 mod test {
-    use super::*;
-    use crate::test_helper;
-    use crate::ReplaceAll;
-
     use http::uri::{Parts, Uri};
     use mockito::ServerGuard;
+
+    use super::*;
+    use crate::{test_helper, ReplaceAll};
 
     async fn make_svc() -> (
         ServerGuard,

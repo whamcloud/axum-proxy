@@ -1,27 +1,22 @@
-use crate::client;
-use crate::future::RevProxyFuture;
-use crate::rewrite::PathRewriter;
-use crate::Error;
+use std::convert::Infallible;
+use std::sync::Arc;
+use std::task::{Context, Poll};
 
 use client::HttpConnector;
 #[cfg(feature = "__rustls")]
 use client::RustlsConnector;
+use http::uri::{Authority, Scheme};
+use http::{Error as HttpError, Request, Response};
+use hyper::body::{Body as HttpBody, Incoming};
 #[cfg(feature = "nativetls")]
 use hyper_tls::HttpsConnector as NativeTlsConnector;
-
-use http::uri::{Authority, Scheme};
-use http::Error as HttpError;
-use http::{Request, Response};
-
-use hyper::body::Body as HttpBody;
-use hyper::body::Incoming;
-use hyper_util::client::legacy::{connect::Connect, Client};
-
+use hyper_util::client::legacy::connect::Connect;
+use hyper_util::client::legacy::Client;
 use tower_service::Service;
 
-use std::convert::Infallible;
-use std::sync::Arc;
-use std::task::{Context, Poll};
+use crate::future::RevProxyFuture;
+use crate::rewrite::PathRewriter;
+use crate::{client, Error};
 
 type BoxErr = Box<dyn std::error::Error + Send + Sync>;
 
@@ -62,6 +57,10 @@ impl<C, B> Builder<C, B> {
 /// Builder of [`ReusedService`], with [`client::http_default()`].
 ///
 /// For the meaning of "authority", refer to the documentation of [`Uri`](http::uri::Uri).
+///
+/// # Errors
+///
+/// When `authority` cannot be converted into an [`Authority`].
 pub fn builder_http<B, A>(authority: A) -> Result<Builder<HttpConnector, B>, HttpError>
 where
     B: HttpBody + Send,
@@ -77,6 +76,10 @@ where
 /// This is the same as [`builder_nativetls()`].
 ///
 /// For the meaning of "authority", refer to the documentation of [`Uri`](http::uri::Uri).
+///
+/// # Errors
+///
+/// When `authority` cannot be converted into an [`Authority`].
 #[cfg(any(feature = "https", feature = "nativetls"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "https", feature = "nativetls"))))]
 pub fn builder_https<B, A>(
@@ -94,6 +97,10 @@ where
 /// Builder of [`ReusedService`], with [`client::nativetls_default()`].
 ///
 /// For the meaning of "authority", refer to the documentation of [`Uri`](http::uri::Uri).
+///
+/// # Errors
+///
+/// When `authority` cannot be converted into an [`Authority`].
 #[cfg(feature = "nativetls")]
 #[cfg_attr(docsrs, doc(cfg(feature = "nativetls")))]
 pub fn builder_nativetls<B, A>(
@@ -111,6 +118,10 @@ where
 /// Builder of [`ReusedService`], with [`client::rustls_default()`].
 ///
 /// For the meaning of "authority", refer to the documentation of [`Uri`](http::uri::Uri).
+///
+/// # Errors
+///
+/// When `authority` cannot be converted into an [`Authority`].
 #[cfg(feature = "__rustls")]
 #[cfg_attr(docsrs, doc(cfg(feature = "rustls")))]
 pub fn builder_rustls<B, A>(
@@ -129,6 +140,10 @@ where
 ///
 /// For the meaning of "scheme" and "authority", refer to the documentation of
 /// [`Uri`](http::uri::Uri).
+///
+/// # Errors
+///
+/// When `scheme` or `authority` cannot be converted into a [`Scheme`] or [`Authority`].
 pub fn builder<C, B, S, A>(
     client: Client<C, B>,
     scheme: S,
@@ -179,6 +194,7 @@ where
 /// let _res = svc2.call(req).await.unwrap();
 /// # }
 /// ```
+#[expect(clippy::module_name_repetitions)]
 #[derive(Debug)]
 pub struct ReusedService<Pr, C, B = Incoming> {
     client: Arc<Client<C, B>>,
@@ -200,6 +216,9 @@ impl<Pr: Clone, C, B> Clone for ReusedService<Pr, C, B> {
 }
 
 impl<Pr, C, B> ReusedService<Pr, C, B> {
+    /// # Errors
+    ///
+    /// When `scheme` or `authority` cannot be converted into a [`Scheme`] or [`Authority`].
     pub fn from<S, A>(
         client: Arc<Client<C, B>>,
         scheme: S,
@@ -228,6 +247,9 @@ where
     B: HttpBody + Send,
     B::Data: Send,
 {
+    /// # Errors
+    ///
+    /// When `authority` cannot be converted into an [`Authority`].
     pub fn with_http_client<A>(
         client: Arc<Client<HttpConnector, B>>,
         authority: A,
@@ -254,6 +276,10 @@ where
     B::Data: Send,
 {
     /// Alias to [`Self::with_nativetls_client()`].
+    ///
+    /// # Errors
+    ///
+    /// When `authority` cannot be converted into an [`Authority`].
     #[cfg_attr(docsrs, doc(cfg(any(feature = "https", feature = "nativetls"))))]
     pub fn with_https_client<A>(
         client: Arc<Client<NativeTlsConnector<HttpConnector>, B>>,
@@ -280,6 +306,10 @@ where
     B: HttpBody + Send,
     B::Data: Send,
 {
+    ///
+    /// # Errors
+    ///
+    /// When `authority` cannot be converted into an [`Authority`].
     #[cfg_attr(docsrs, doc(cfg(feature = "nativetls")))]
     pub fn with_nativetls_client<A>(
         client: Arc<Client<NativeTlsConnector<HttpConnector>, B>>,
@@ -306,6 +336,10 @@ where
     B: HttpBody + Send,
     B::Data: Send,
 {
+    ///
+    /// # Errors
+    ///
+    /// When `authority` cannot be converted into an [`Authority`].
     #[cfg_attr(docsrs, doc(cfg(feature = "rustls")))]
     pub fn with_rustls_client<A>(
         client: Arc<Client<RustlsConnector<HttpConnector>, B>>,
@@ -355,12 +389,11 @@ where
 
 #[cfg(test)]
 mod test {
-    use super::*;
-    use crate::test_helper;
-    use crate::ReplaceAll;
-
     use http::uri::{Parts, Uri};
     use mockito::ServerGuard;
+
+    use super::*;
+    use crate::{test_helper, ReplaceAll};
 
     async fn make_svc() -> (
         ServerGuard,
