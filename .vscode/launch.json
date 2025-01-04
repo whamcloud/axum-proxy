@@ -9,11 +9,7 @@
             "request": "launch",
             "name": "Debug executable 'axum-proxy'",
             "cargo": {
-                "args": [
-                    "build",
-                    "--bin=axum-proxy",
-                    "--package=axum-proxy"
-                ],
+                "args": ["build", "--bin=axum-proxy", "--package=axum-proxy"],
                 "filter": {
                     "name": "axum-proxy",
                     "kind": "bin"
