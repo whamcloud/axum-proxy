@@ -53,7 +53,7 @@ pub trait PathRewriter {
 /// Identity function, that is, this returns the `path` as is.
 ///
 /// ```
-/// # use tower_reverse_proxy::rewrite::{PathRewriter, Identity};
+/// # use axum_proxy::rewrite::{PathRewriter, Identity};
 /// assert_eq!(Identity.rewrite("foo"), "foo");
 /// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -69,7 +69,7 @@ impl PathRewriter for Identity {
 /// Returns `self.0` regardless what the `path` is.
 ///
 /// ```
-/// # use tower_reverse_proxy::rewrite::{PathRewriter, Static};
+/// # use axum_proxy::rewrite::{PathRewriter, Static};
 /// assert_eq!(Static("bar").rewrite("foo"), "bar");
 /// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -85,7 +85,7 @@ impl PathRewriter for Static<'_> {
 /// `ReplaceAll(old, new)` replaces all matches `old` with `new`.
 ///
 /// ```
-/// # use tower_reverse_proxy::rewrite::{PathRewriter, ReplaceAll};
+/// # use axum_proxy::rewrite::{PathRewriter, ReplaceAll};
 /// assert_eq!(ReplaceAll("foo", "bar").rewrite("foofoo"), "barbar");
 /// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -104,7 +104,7 @@ impl PathRewriter for ReplaceAll<'_> {
 /// `ReplaceN(old, new, n)` replaces first `n` matches `old` with `new`.
 ///
 /// ```
-/// # use tower_reverse_proxy::rewrite::{PathRewriter, ReplaceN};
+/// # use axum_proxy::rewrite::{PathRewriter, ReplaceN};
 /// assert_eq!(ReplaceN("foo", "bar", 1).rewrite("foofoo"), "barfoo");
 /// assert_eq!(ReplaceN("foo", "bar", 3).rewrite("foofoo"), "barbar");
 /// ```
@@ -124,7 +124,7 @@ impl PathRewriter for ReplaceN<'_> {
 /// Trims a prefix if exists.
 ///
 /// ```
-/// # use tower_reverse_proxy::rewrite::{PathRewriter, TrimPrefix};
+/// # use axum_proxy::rewrite::{PathRewriter, TrimPrefix};
 /// assert_eq!(TrimPrefix("foo").rewrite("foobarfoo"), "barfoo");
 /// assert_eq!(TrimPrefix("bar").rewrite("foobarfoo"), "foobarfoo");
 /// ```
@@ -144,7 +144,7 @@ impl PathRewriter for TrimPrefix<'_> {
 /// Trims a suffix if exists.
 ///
 /// ```
-/// # use tower_reverse_proxy::rewrite::{PathRewriter, TrimSuffix};
+/// # use axum_proxy::rewrite::{PathRewriter, TrimSuffix};
 /// assert_eq!(TrimSuffix("foo").rewrite("foobarfoo"), "foobar");
 /// assert_eq!(TrimSuffix("bar").rewrite("foobarfoo"), "foobarfoo");
 /// ```
@@ -164,7 +164,7 @@ impl PathRewriter for TrimSuffix<'_> {
 /// Appends a prefix.
 ///
 /// ```
-/// # use tower_reverse_proxy::rewrite::{PathRewriter, AppendPrefix};
+/// # use axum_proxy::rewrite::{PathRewriter, AppendPrefix};
 /// assert_eq!(AppendPrefix("foo").rewrite("bar"), "foobar");
 /// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -182,7 +182,7 @@ impl PathRewriter for AppendPrefix<'_> {
 /// Appends a suffix.
 ///
 /// ```
-/// # use tower_reverse_proxy::rewrite::{PathRewriter, AppendSuffix};
+/// # use axum_proxy::rewrite::{PathRewriter, AppendSuffix};
 /// assert_eq!(AppendSuffix("foo").rewrite("bar"), "barfoo");
 /// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -203,7 +203,7 @@ impl PathRewriter for AppendSuffix<'_> {
 /// See [`regex`] for details.
 ///
 /// ```
-/// # use tower_reverse_proxy::rewrite::{PathRewriter, RegexAll};
+/// # use axum_proxy::rewrite::{PathRewriter, RegexAll};
 /// # use regex::Regex;
 /// let re = Regex::new(r"(?P<y>\d{4})/(?P<m>\d{2})").unwrap();
 /// assert_eq!(
@@ -226,7 +226,7 @@ impl<Rep: Replacer> PathRewriter for RegexAll<Rep> {
 /// See [`regex`] for details.
 ///
 /// ```
-/// # use tower_reverse_proxy::rewrite::{PathRewriter, RegexN};
+/// # use axum_proxy::rewrite::{PathRewriter, RegexN};
 /// # use regex::Regex;
 /// let re = Regex::new(r"(?P<y>\d{4})/(?P<m>\d{2})").unwrap();
 /// assert_eq!(
@@ -252,7 +252,7 @@ impl<Rep: Replacer> PathRewriter for RegexN<Rep> {
 /// The type of the function must be `for<'a> FnMut(&'a str) -> String`.
 ///
 /// ```
-/// # use tower_reverse_proxy::rewrite::{PathRewriter, Func};
+/// # use axum_proxy::rewrite::{PathRewriter, Func};
 /// let f = |path: &str| path.len().to_string();
 /// assert_eq!(Func(f).rewrite("abc"), "3");
 /// ```

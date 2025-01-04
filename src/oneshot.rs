@@ -24,8 +24,8 @@ type BoxErr = Box<dyn std::error::Error + Send + Sync>;
 ///
 /// ```
 /// # async fn run_test() {
-/// # use tower_reverse_proxy::OneshotService;
-/// # use tower_reverse_proxy::Static;
+/// # use axum_proxy::OneshotService;
+/// # use axum_proxy::Static;
 /// # use tower_service::Service;
 /// # use http_body_util::Empty;
 /// # use http::Request;

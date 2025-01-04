@@ -9,6 +9,6 @@
     },
     "rust-analyzer.debug.openDebugPane": true,
     "rust-analyzer.runnables.extraEnv": {
-        "RUST_LOG": "DEBUG,tower_reverse_proxy=TRACE"
+        "RUST_LOG": "DEBUG,axum_proxy=TRACE"
     }
 }

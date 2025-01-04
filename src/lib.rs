@@ -1,6 +1,6 @@
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
-//! `tower-reverse-proxy` is tower [`Service`s](tower_service::Service) that performs "reverse
+//! `axum-proxy` is tower [`Service`s](tower_service::Service) that performs "reverse
 //! proxy" with various rewriting rules.
 //!
 //! Internally these services use [`hyper::Client`] to send an incoming request to the another
@@ -19,15 +19,15 @@
 //!
 //! ```
 //! # async fn run_test() {
-//! use tower_reverse_proxy::ReusedServiceBuilder;
-//! use tower_reverse_proxy::{ReplaceAll, ReplaceN};
+//! use axum_proxy::ReusedServiceBuilder;
+//! use axum_proxy::{ReplaceAll, ReplaceN};
 //!
 //! use hyper::body::Bytes;
 //! use http_body_util::Full;
 //! use http::Request;
 //! use tower_service::Service as _;
 //!
-//! let svc_builder = tower_reverse_proxy::builder_http("example.com:1234").unwrap();
+//! let svc_builder = axum_proxy::builder_http("example.com:1234").unwrap();
 //!
 //! let req1 = Request::builder()
 //!     .method("GET")
@@ -64,15 +64,15 @@
 //!
 //! ```
 //! # #[cfg(feature = "axum")] {
-//! use tower_reverse_proxy::ReusedServiceBuilder;
-//! use tower_reverse_proxy::{TrimPrefix, AppendSuffix, Static};
+//! use axum_proxy::ReusedServiceBuilder;
+//! use axum_proxy::{TrimPrefix, AppendSuffix, Static};
 //!
 //! use axum::Router;
 //!
 //! #[tokio::main]
 //! async fn main() {
-//!     let host1 = tower_reverse_proxy::builder_http("example.com").unwrap();
-//!     let host2 = tower_reverse_proxy::builder_http("example.net:1234").unwrap();
+//!     let host1 = axum_proxy::builder_http("example.com").unwrap();
+//!     let host2 = axum_proxy::builder_http("example.net:1234").unwrap();
 //!
 //!     let app = Router::new()
 //!         .route_service("/healthcheck", host1.build(Static("/")))

@@ -168,13 +168,13 @@ where
 ///
 /// ```
 /// # async fn run_test() {
-/// # use tower_reverse_proxy::ReusedService;
-/// # use tower_reverse_proxy::Static;
+/// # use axum_proxy::ReusedService;
+/// # use axum_proxy::Static;
 /// # use tower_service::Service;
 /// # use http_body_util::Empty;
 /// # use http::Request;
 /// # use hyper::body::{Body, Bytes};
-/// let svc_builder = tower_reverse_proxy::builder_http("example.com:1234").unwrap();
+/// let svc_builder = axum_proxy::builder_http("example.com:1234").unwrap();
 ///
 /// let mut svc1 = svc_builder.build(Static("bar"));
 /// let mut svc2 = svc_builder.build(Static("baz"));

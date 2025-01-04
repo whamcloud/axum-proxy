@@ -1,5 +1,5 @@
 {
-  "name": "tower-reverse-proxy",
+  "name": "axum-proxy",
   "version": "0.0.0-development",
   "description": "It's written in Rust!",
   "main": "src/main.rs",
@@ -12,14 +12,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/kristof-mattei/tower-reverse-proxy.git"
+    "url": "https://github.com/kristof-mattei/axum-proxy.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/kristof-mattei/tower-reverse-proxy/issues"
+    "url": "https://github.com/kristof-mattei/axum-proxy/issues"
   },
-  "homepage": "https://github.com/kristof-mattei/tower-reverse-proxy#readme",
+  "homepage": "https://github.com/kristof-mattei/axum-proxy#readme",
   "devDependencies": {
     "@actions/tool-cache": "2.0.1",
     "prettier": "3.4.2"
