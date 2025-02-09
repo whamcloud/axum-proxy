@@ -60,7 +60,7 @@ hyper-util = { version = "0.1.2", features = [
 ] }
 
 [dev-dependencies]
-tokio = { version = "1.43.0", features = ["macros", "rt-multi-thread"] }
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
 mockito = "1.6.1"
 http-body-util = "0.1.2"
 
