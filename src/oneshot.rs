@@ -220,7 +220,7 @@ where
 impl<C, B, Pr> Service<Request<B>> for OneshotService<Pr, C, B>
 where
     C: Connect + Clone + Send + Sync + 'static,
-    B: HttpBody + Send + 'static + Unpin,
+    B: HttpBody + Send + Default + 'static + Unpin,
     B::Data: Send,
     B::Error: Into<BoxErr>,
     Pr: PathRewriter,

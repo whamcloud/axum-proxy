@@ -22,22 +22,35 @@ pub struct RevProxyFuture {
 impl RevProxyFuture {
     pub(crate) fn new<C, B, Pr>(
         client: &Client<C, B>,
-        mut req: Request<B>,
+        req: Request<B>,
         scheme: &Scheme,
         authority: &Authority,
         path: &mut Pr,
     ) -> Self
     where
         C: Connect + Clone + Send + Sync + 'static,
-        B: HttpBody + Send + 'static + Unpin,
+        B: HttpBody + Send + Default + 'static + Unpin,
         B::Data: Send,
         B::Error: Into<BoxErr>,
         Pr: PathRewriter,
     {
-        let inner = path
-            .rewrite_uri(&mut req, scheme, authority)
-            .map(|()| client.request(req))
+        let mut builder = Request::builder().method(req.method()).uri(req.uri());
+
+        for (key, value) in req.headers() {
+            builder = builder.header(key, value);
+        }
+
+        let (_, body) = req.into_parts();
+
+        let inner = builder
+            .body(body)
+            .and_then(|mut req| {
+                path.rewrite_uri(&mut req, scheme, authority)?;
+
+                Ok(client.request(req))
+            })
             .map_err(Some);
+
         Self { inner }
     }
 }
